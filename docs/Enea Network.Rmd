@@ -68,6 +68,7 @@ Analysing the result of and , we have 298 links in community 1, and 402 links in
 
 ```{r}
 e
+
 ```
 
 Now let us define the 'er' that is the normalisation of e with respect to the total number of links in the network
