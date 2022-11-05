@@ -1,22 +1,17 @@
----
-title: "Esame Network Pietro Enea"
-author: "Pietro Enea"
-date: '2022-10-26'
-output: html_document
----
-Carico il dataset
+
+Loading the dataset
 
 ```{r}
 net <- read.table("road-euroroad.edges", quote="\"", comment.char="")
 ```
 
-Creo lista di vertici
+I create a list of vertices
 ```{r}
 vertices=sort(unique(unlist(net)))
 vertices
 ```
 
-Trovo la lunghezza dei vertici
+I find the length of the vertices
 ```{r}
 n=length(vertices)
 n
@@ -28,7 +23,7 @@ L=dim(net)[1]
 L
 ```
 
-Calcolo il grado, ossia il numero di volte che un vettore appare nella rete
+I calculate the degree, i.e. the number of times a vector appears in the network
 ```{r}
 Ki=table(unlist(net))
 Ki=as.vector(unname(Ki))#usiamo unname per togliere associazione per avere un vettore
@@ -41,26 +36,26 @@ sol=sample(c(1,2),n,replace=T)
 sol
 ```
 
-Costruisco una matrice surrogata della matrice dei link, a ogni link si sostituisce comunità di appartenenza, quindi inizializzo linksCOM al network
+I construct a surrogate matrix of the link matrix, each link is replaced by its community, then initialise linksCOM to the network
 ```{r}
 linksCOM=net
 ```
 
-Apporto una modifica, in cui sostituisco le colonne con quelle che avremmo inserendo le comunità. Uso cbind che affianca colonne di stessa lunghezza, a formare una matrice. sol di linksCOM ,1 rimpiazza ogni elemento della prima colonna di linksCOM la sua comunità che si trova in SOL. Quindi faccio un cbind con secondo vettore sol linksCOM ,2 identico applicato sulla seconda colonna di network(o linksCOM). Applico la parentesi quadra perchè sol è un vettore. Il risultato sarà una matrice con due colonne in cui al posto dei vertici ci sono le comunità a cui appartengono
+I make a modification, in which I replace the columns with the ones that would be inserted by the communities. I use cbind which places columns of the same length side by side, to form an array. sol of linksCOM ,1 replaces each element in the first column of linksCOM its community in SOL. Then I do a cbind with second vector sol linksCOM ,2 identical applied on the second column of network(or linksCOM). I apply the square bracket because sol is a vector. The result will be a matrix with two columns in which instead of vertices are the communities to which they belong
 
 ```{r}
 linksCOM=cbind(sol[linksCOM[,1]],sol[linksCOM[,2]])
 linksCOM
 ```
 
-Calcolo la modularità, per cui e uguale a insieme vuoto
+I calculate modularity, so it equals empty set
 ```{r}
 e=c()
 ```
 
-A questo punto calcolo il numero di link osservati dentro ciascuna comunità con linksCOM. In linksCOM prendo tutte le righe in cui abbiamo 1 1, quindi tutti gli elementi della prima comunità quando vado a vedere il numero di link osservati nella prima e gli elementi di tipo 2 2 per calcolare il numero di link nella comunità 2. Infine faccio un for su due indici, andando a selezionare una sottorete con subset. 
+At this point I calculate the number of links observed within each community with linksCOM. In linksCOM I take all the rows where we have 1 1, then all the elements of the first community when I go to see the number of links observed in the first and the elements of type 2 2 to calculate the number of links in community 2. Finally I do a for on two indexes, going to select a subnet with subsets. 
 
-linksCOM elementi di prima e seconda colonna = a i. Quando i = 1 prenderò le righe con tutti gli elementi fatti cosi, stessa cosa per 2. Quindi conto con nrow la lunghezza di subi così da ottenere la quantità e[i] che sarà il numero di link nella comunità 1. 
+linksCOM first and second column elements = to i. When i = 1 I will take the rows with all elements done so, same for 2. Then I count with nrow the length of subi so that I get the quantity e[i] which will be the number of links in community 1. 
 
 ```{r}
 for(i in 1:2){
@@ -69,32 +64,32 @@ for(i in 1:2){
 }
 ```
 
-Analizzando il risultato di e , abbiamo 298 link nella comunità 1, e 402 link nella comunità 2. 
+Analysing the result of and , we have 298 links in community 1, and 402 links in community 2. 
 
 ```{r}
 e
 ```
 
-Adesso definiamo l' er ossia la normalizzazione di e rispetto al numero totale di link nella rete
+Now let us define the 'er' that is the normalisation of e with respect to the total number of links in the network
 
 ```{r}
 er=e/L
 er
 ```
 
-Calcolo ar e ar quadro dava il numero di i k esi dentro le comunità. Inizializiamo con vettore vuoto
+Calculating ar and ar framework gave the number of i k es inside the communities. We start with empty vector
 
 ```{r}
 a=c()
 ```
 
-Sono interessato a guardare un subset di matrCOMK, ossia si una matrice in cui ho la soluzione (intesa come comunità) e accanto il grado. Nella prima colonna la lista della comunità per ciascun nodo, nella seconda colonna il grado Ki. Come risultato abbiamo, per ogni elemento, la comunità cui appartiene e il grado
+I am interested in looking at a subset of matrCOMK, i.e. a matrix in which I have the solution (understood as community) and next to it the degree. In the first column the community list for each node, in the second column the degree Ki. As a result we have, for each element, the community to which it belongs and the degree
 
 ```{r}
 matrCOMK=cbind(sol,Ki)
 matrCOMK
 ```
-Adesso procediamo con l' esecuzione di un ciclo for ma questa volta siamo interessati al grado. a è definito come il grado medio. Nel for andiamo a calcolare il degree totale in ciascuna comunità con istruzione subset, questa volta con matrCOM, e dobbiamo imporre che la prima colonna sia == i(in questo modo ho selezionato tutti i vertici, i loro gradi, che stanno nella comunità i esima). Dentro il ciclo for calcolo il totale della seconda colonna di questa  matrice subi, cioè del grado.
+Now we proceed with the execution of a for loop but this time we are interested in the degree. a is defined as the average degree. In the for loop we calculate the total degree in each community with subset instruction, this time with matrCOM, and we must impose that the first column is == i (in this way I have selected all vertices, their degrees, which are in the community i esima). Inside the for loop I calculate the total of the second column of this subset matrix, i.e. the degree.
 
 ```{r}
 for(i in 1:2){
@@ -104,7 +99,7 @@ for(i in 1:2){
 ```
 
 
-a si standardizza con ar; ar è ottenuto dividendo a per 2L, poichè la somma totale dei degree fa due volte il numero di link nella mtrice
+a is standardised with ar; ar is obtained by dividing a by 2L, as the total sum of the degrees makes twice the number of links in the mtrice
 
 ```{r}
 a 
@@ -114,14 +109,14 @@ ar2=ar^2
 ar2
 ```
 
-adesso sono pronto a calcolare la modularità che sarà data dalla somma di er - ar2
+I am now ready to calculate the modularity which will be given by the sum of er - ar2
 
 ```{r}
 modularity=sum(er-ar2)
 modularity
 ```
 
-Una volta calcolata la modularità, questa va implementata dentro il ciclo for o altro del simulated annealing. Ma in r per problemi legati alla definizione di variabili, conviene costruire una funzione che calcola la modularità. Creo una funzione che prende in ingresso la lista dei link e una soluzione sol, e dà in uscita la modularità. modularity = funciton(do in ingresso due variabili che chiamo net e solution) serve per avere dei valori da assegnare in automatico. Uso le due variabili come le abbiamo usate fin' ora e dentro le parentesi graffe ricopio ciò fatto fin'ora ricordandomi che quello che faceva net rimane net(che è il network), e sol diventa solution. QUindi seleziono e calcolo da e=c() a modularity = sum(er-ar2) di sopra, lo copio e incollo a seguire cambiando sol in solution.
+Once the modularity has been calculated, it must be implemented within the for loop or other of the simulated annealing. But in r for variable definition problems, it is better to construct a function that calculates the modularity. I create a function which takes as input the list of links and a solution sol, and gives as output the modularity. modularity = funciton(I give as input two variables which I call net and solution) serves to have values to assign automatically. I use the two variables as we have used them so far and inside the curly brackets I copy what I have done so far, remembering that what net did remains net (which is the network), and sol becomes solution. Then I select and calculate from e=c() to modularity = sum(er-ar2) above, copy and paste it to follow, changing sol to solution.
 
 ```{r}
 modularity = function(network=network, solution=solution){
@@ -157,7 +152,7 @@ modularity = function(network=network, solution=solution){
 modularity(net, sol)
 ```
 
-Ho definito questa funzione modularity, cosi adesso dentro la routine del simulated annealing basterà richiamarla per calcolare la modularità. Chiarite le temperature iniziali, prendendo 200 soluzioni casuali, ho visto le distanze tra essi per il setting della temperatura iniziale.Creo un vettore modularityVEC e lo inzializziamo con vettore vuoto
+I have defined this modularity function, so now inside the simulated annealing routine I only need to call it up to calculate the modularity. By taking 200 random solutions, I saw the distances between them for the initial temperature setting.I create a vector modularityVEC and initialise it with empty vector
 
 ```{r}
 modularityVEC = c()
@@ -169,7 +164,7 @@ Setto 200 simulazioni
 nsim = 200
 ```
 
-Realizzo un ciclo for che itera la procedura per la determeinazione delle soluzioni e conseguente modularità q fino a nsim. Genero una soluzione casuale di elementi 1,2 di lunghezza n con replace. Imposto una eguaglianza con modularity prima definita. Cosi ho vettore di modularità
+I generate a for loop which iterates the procedure for determining solutions and subsequent modularity q up to nsim. I generate a random solution of elements 1,2 of length n with replace. I set an equality with modularity first defined. So I have modularity vector
 
 
 ```{r}
@@ -180,7 +175,7 @@ for(i in 1:nsim){
 modularityVEC
 ```
 
-Fatte le modularità, vado a vedere le distanze tra tutte le coppie di modularità, quindi creo una dis inizializzata come una quantità nulla, e calcolo tutte le distanze con due cicli for annidati. Faccio le differenze tra tutte le coppie distinte di modularità e uso append per far appendere questa distanza al vettore di tutte le distanze dis, così ottengo il vettore con tutte le distanze su cui posso calcolare la media. Quindi vedo la lunghezza dis dopo aver avviato il ciclo for
+Having made the modularities, I go to see the distances between all pairs of modularities, then create a dis initialised as a null quantity, and calculate all distances with two nested for loops. I do the differences between all distinct modularity pairs and use append to hang this distance on the vector of all dis distances, so I get the vector with all distances on which I can calculate the average. I then see the length dis after starting the for loop
 
 ```{r}
 dis=c()
@@ -193,14 +188,14 @@ for(i in 1:(nsim-1)){
 length(dis)
 ```
 
-Calcolo la media cosi che posso settare la temperatura iniziale 
+I calculate the average so that I can set the initial temperature 
 
 ```{r}
 mm=mean(dis)
 mm
 ```
 
-Inizializzo le temperature
+Initialising temperatures
 
 ```{r}
 T0=100*mm #T0 100 volte media distanze
@@ -208,7 +203,7 @@ Tf = mm/100
 nsim = 10000 #simulazioni
 ```
 
-Definisco i parametri dell' esponenziale con cui si fa decrescere la temperatura
+I define the parameters of the exponential by which the temperature decreases
 ```{r}
 A = T0
 B = log(Tf/A)/nsim
@@ -216,7 +211,7 @@ A
 B
 ```
 
-Ora definisco l' esponenziale per la temperatura, così genero un vettore e setto tutte le temperature
+Now I define the exponential for temperature, so I generate a vector and set all temperatures
 
 
 ```{r}
@@ -226,26 +221,26 @@ min(Temp)
 max(Temp)
 ```
 
-Una volta che ho scritto la definizione di come deve variare la temperatura,e ho la fonzione che calcola la modularità, posso partire con l' implementazione del simulated annealing. Inizializzo un vettore modularityPROC per ricordarmi di tenere conto di tutti i valori di modularità esplorati
+Once I have written the definition of how the temperature must vary, and I have the phonation that calculates the modularity, I can start with the implementation of simulated annealing. I initialise a modularityPROC vector to remind me to take into account all the modularity values explored
 
 ```{r}
 modularityPROC = c()
 ```
 
-Inizializzo una solNEW a sol per avere la prima soluzione iniziale casuale
+I initialise a solNEW to sol to get the first random initial solution
 
 ```{r}
 solNEW = sol
 ```
 
-Inizializzo la modularità ottimale
+Initialising optimal modularity
 
 ```{r}
 modularityBEST=modularity(net, solNEW)
 modularityBEST  #è negativa a quella iniziale
 ```
 
-Inizializzo il ciclo for. Nel SA devo andare a scegliere a caso un nodo e cambiare la sua comunità. Quindi devo dare un sample casuale da 1 a n, e andare a cambiare questo in sol
+I initialise the for loop. In the SA I have to go and randomly choose a node and change its community. So I have to give a random sample from 1 to n, and go and change this to sol
 
 ```{r}
 for(t in 1:nsim){
@@ -268,7 +263,7 @@ for(t in 1:nsim){
 }
 ```
 
-Realizzo il plot
+Realising the plot
 
 ```{r}
 plot(modularityPROC, type = "l")
@@ -277,7 +272,7 @@ modularityBEST
 
 ```
 
-Realizzo grafico del network con Cytoscape
+Network graphic design with Cytoscape
 ```{r}
 library(igraph)
 library(RCy3)
@@ -288,21 +283,7 @@ cytoscapeVersionInfo ()
 createNetworkFromIgraph(net1, title = "From Igraph", collection = "My Igraph Network Collection")
 ```
 
-Interpretazione grafico:
-Dal grafico del network notiamo come ci siano comunità più coese, che evidenziano strade appartenenti magari a determinate regioni europee e network distaccati che potrebbero suggerire regioni non collegate tra loro da medesime strade.
+Graph interpretation:
+From the network graph we can see that there are more cohesive communities, highlighting roads perhaps belonging to certain European regions, and detached networks that might suggest regions not connected by the same roads.
 
-Trovo modularità con igraph per realizzare un paragone 
-N.B Nonostante le diverse prove per trovare una soluzione all' errore, la funzione mi ritorna un errore che non mi permette di trovare la modularità con igraph
-
-```{r}
-#net_undirected <- net %>% 
-#  filter(V1 != lag(V2, default = 0) & V2 != lag(V1, default = 0))
-#View(net_undirected)
-
-#net_und_graph <- graph_from_data_frame(net_undirected)
-
-
-#clust <- cluster_edge_betweenness(net_und_graph)
-#modularity(clust)
-```
 
